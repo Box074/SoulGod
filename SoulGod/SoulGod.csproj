@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ModName>Soul God</ModName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HKBuildUtils" Version="0.5.56">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ModReference Include="HKTool" AssemblyName="HKTool2" />
+  </ItemGroup>
+
+</Project>
