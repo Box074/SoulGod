@@ -80,26 +80,40 @@ namespace SoulGod
                 SoulTyrantFSM.Apply(pm);
 
                 newspinner = new GameObject("Spinner Group");
-                var sp0 = UObject.Instantiate(OrbSpinner, newspinner.transform);
-                sp0.SetActive(true);
-                var sp1 = UObject.Instantiate(OrbSpinner, newspinner.transform);
-                sp1.SetActive(true);
 
-                var sspm = sp1.LocateMyFSM("Spin Control");
-                var s = sspm.Fsm.GetState("Idle");
-                s.GetFSMStateActionOnState<Rotate>().zAngle = -270;
-                s.SaveActions();
+                FsmEventProxy.Attach(newspinner, out var p, "Init");
 
-                s = sspm.Fsm.GetState("Spin");
-                s.GetFSMStateActionOnState<Rotate>().zAngle = -270;
-                s.SaveActions();
+                void SpawnSpinner(float rotateZ)
+                {
+                    var sp1 = UObject.Instantiate(OrbSpinner, newspinner.transform);
+                    p.proxy.targets.Add(sp1);
+
+                    var sspm = sp1.LocateMyFSM("Spin Control");
+                    sspm.Fsm.RestartOnEnable = true;
+                    var s = sspm.Fsm.GetState("Idle");
+                    s.GetFSMStateActionOnState<Rotate>().zAngle = rotateZ;
+                    s.SaveActions();
+
+                    s = sspm.Fsm.GetState("Spin");
+                    s.GetFSMStateActionOnState<Rotate>().zAngle = rotateZ;
+                    s.SaveActions();
+                    
+                    sp1.SetActive(true);
+                }
+
+                SpawnSpinner(270);
+                SpawnSpinner(-270);
+                
             }
             else
             {
                 newspinner = UObject.Instantiate(SuperOrbSpinner, oldspinner.transform.parent);
             }
+            
+            newspinner.transform.parent = oldspinner.transform.parent;
             newspinner.transform.localPosition = oldspinner.transform.localPosition;
             newspinner.transform.localScale = oldspinner.transform.localScale;
+            
             UObject.Destroy(oldspinner);
             proxy.Variables.Orb_Spinner.Value = newspinner;
             newspinner.SetActive(true);
