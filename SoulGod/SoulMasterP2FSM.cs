@@ -19,7 +19,12 @@ namespace SoulGod
         public tk2dSpriteAnimator anim = null!;
         protected override void OnAfterBindPlayMakerFSM()
         {
-
+            FsmComponent.Fsm
+                .GetState(FSMProxy_SoulMaster.StateNames.Stun_Init)
+                .AppendFsmStateAction(new InvokeAction(() =>
+                {
+                    PlayMakerFSM.BroadcastEvent("DISSIPATE");
+                }));
             FsmComponent.Fsm
                 .GetState(FSMProxy_SoulMasterP2.StateNames.Quake_Antic)
                 .AppendFsmStateAction(new InvokeAction(() =>
@@ -68,7 +73,7 @@ namespace SoulGod
 
             sp.GetComponent<SpinnerControl>().StartCoroutine(nameof(SpinnerControl.StartRun));
             sp2.GetComponent<SpinnerControl>().StartCoroutine(nameof(SpinnerControl.StartRun));
-            yield return new WaitForSeconds(5.5f * UnityEngine.Random.value);
+            yield return new WaitForSeconds(3.5f * UnityEngine.Random.value);
         }
     }
 }

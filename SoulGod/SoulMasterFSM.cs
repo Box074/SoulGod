@@ -80,7 +80,32 @@ namespace SoulGod
                     orbL = null;
                     orbR = null;
                 }));
-
+            FsmComponent.Fsm
+                .GetState(FSMProxy_SoulMaster.StateNames.Fakeout)
+                .InsertFsmStateAction(new InvokeAction(() =>
+                {
+                    if(UnityEngine.Random.value < 0.5f)
+                    {
+                        proxy.Variables.Faked.Value = false;
+                    }
+                    if(!HeroController.instance.cState.onGround
+                        && !HeroController.instance.Reflect().CanDash()    
+                    )
+                    {
+                        if(Mathf.Abs(HeroController.instance.transform.position.x - 
+                            transform.position.x) < 3)
+                        {
+                            proxy.Variables.Faked.Value = true;
+                        }
+                        else
+                        {
+                            if(UnityEngine.Random.value < 0.5f)
+                            {
+                                FsmComponent.SendEvent("FAKE");
+                            }
+                        }
+                    }
+                }), 0);
             var ac = FsmComponent.Fsm
                 .GetState(FSMProxy_SoulMaster.StateNames.Attack_Choice)
                 .GetFSMStateActionOnState<SendRandomEventV3>();
@@ -185,7 +210,7 @@ namespace SoulGod
 
                 if (!useSecond)
                 {
-                    yield return new WaitForSeconds(1.35f 
+                    yield return new WaitForSeconds(1f 
                         * UnityEngine.Random.value
                         * (count < 5 ? (5 - count) * 0.2f : 1));
                 }

@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fody" Version="6.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="HKBuildUtils" Version="0.5.56">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -14,6 +18,8 @@
 
   <ItemGroup>
     <ModReference Include="HKTool" AssemblyName="HKTool2" />
+
+    <ReflectHelper Include="Assembly-CSharp" />
   </ItemGroup>
 
 </Project>
