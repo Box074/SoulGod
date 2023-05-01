@@ -30,6 +30,9 @@ namespace SoulGod
         [PreloadSharedAssets(102, "mage_lord_projectile_charge")]
         public AudioClip mage_lord_projectile_charge = null!;
 
+        [PreloadSharedAssets(34, "Electro Zap")]
+        public GameObject zapPrefab = null!;
+
         bool hitBySM = false;
 
         public static void SetSpinnerRotate(GameObject spinner, float z)
@@ -88,10 +91,14 @@ namespace SoulGod
             }
         }
 
-        [FsmPatcher("", "Mage Lord", "Mage Lord")]
-        [FsmPatcher("", "Dream Mage Lord", "Mage Lord")]
+        [FsmPatcher("GG_Soul_Master", "Mage Lord", "Mage Lord")]
+        [FsmPatcher("GG_Soul_Tyrant", "Dream Mage Lord", "Mage Lord")]
         private void PatchSoulMaster(PlayMakerFSM pm)
         {
+            GameObject.Find("GG_Arena_Prefab/Crowd")?.SetActive(false);
+            GameObject.Find("GG_Arena_Prefab/BG/throne")?.transform.SetPositionY(0.79f);
+            GameObject.Find("GG_Arena_Prefab/Godseeker Crowd")?.transform.SetPositionY(6.8f);
+
             var fsm = SoulMasterFSM.Apply(pm);
             var proxy = new FSMProxy_SoulMaster(pm);
             var oldspinner = proxy.Variables.Orb_Spinner.Value;
@@ -134,8 +141,8 @@ namespace SoulGod
             newspinner.SetActive(true);
         }
 
-        [FsmPatcher("", "Mage Lord Phase2", "Mage Lord 2")]
-        [FsmPatcher("", "Dream Mage Lord Phase2", "Mage Lord 2")]
+        [FsmPatcher("GG_Soul_Master", "Mage Lord Phase2", "Mage Lord 2")]
+        [FsmPatcher("GG_Soul_Tyrant", "Dream Mage Lord Phase2", "Mage Lord 2")]
         private void PatchSoulMasterP2(PlayMakerFSM pm)
         {
             SoulMasterP2FSM.Apply(pm);

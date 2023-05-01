@@ -120,7 +120,9 @@ namespace SoulGod
             {
                 var orb = Instantiate(SoulGodMod.Instance.MageOrbPrefab, 
                     rayOrb.transform.position, Quaternion.identity);
-
+                var oc = orb.AddComponent<MageOrbControl>();
+                oc.canTouchWall = false;
+                oc.isTrigger = true;
                 var rig = orb.GetComponent<Rigidbody2D>();
                 rig.velocity = new(UnityEngine.Random.Range(-20, 20),
                     UnityEngine.Random.Range(-10, 10));

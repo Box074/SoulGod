@@ -16,7 +16,7 @@ namespace SoulGod
         public GameObject orbR;
 
         [ComponentBinding]
-        public tk2dSpriteAnimator anim;
+        public tk2dSpriteAnimator anim = null!;
         protected override void OnAfterBindPlayMakerFSM()
         {
 

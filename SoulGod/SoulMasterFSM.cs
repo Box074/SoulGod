@@ -113,7 +113,7 @@ namespace SoulGod
             yield return StartActionContent;
             yield return new WaitForSeconds(0.1f);
 
-            hm.hp = BaseHP;
+            hm.hp = BaseHP + 500;
         }
 
         [FsmState]
@@ -174,8 +174,10 @@ namespace SoulGod
             var orbs = group.SelectMany(x => x.transform.Cast<Transform>())
                 .Select(x => x.gameObject).ToArray();
             SoulGodMod.Instance.Log("Total Mage Orb Count: " + orbs.Length);
+            int count = orbs.Length;
             foreach (var orb in orbs)
             {
+                count--;
                 var o = Instantiate(SoulGodMod.Instance.MageOrbPrefab, orb.transform.position,
                     orb.transform.localRotation);
                 orb.Recycle();
@@ -183,7 +185,9 @@ namespace SoulGod
 
                 if (!useSecond)
                 {
-                    yield return new WaitForSeconds(1.35f * UnityEngine.Random.value);
+                    yield return new WaitForSeconds(1.35f 
+                        * UnityEngine.Random.value
+                        * (count < 5 ? (5 - count) * 0.2f : 1));
                 }
             }
             foreach (var g in group)

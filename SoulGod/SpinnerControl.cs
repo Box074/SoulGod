@@ -11,7 +11,7 @@ namespace SoulGod
         public static float speed = 12;
         void Start()
         {
-            var spinner = Instantiate(SoulGodMod.Instance.OrbSpinner, transform);
+            var spinner = Instantiate(SoulGodMod.Instance.SuperOrbSpinner, transform);
             spinner.SetActive(true);
             FSMUtility.SendEventToGameObject(spinner, "SPINNER SUMMON");
             isRunning = false;
