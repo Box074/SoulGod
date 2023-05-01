@@ -11,21 +11,14 @@ namespace SoulGod
         public static float speed = 12;
         void Start()
         {
-            var spinner = Instantiate(SoulGodMod.Instance.SuperOrbSpinner, transform);
+            var spinner = Instantiate(SoulGodMod.Instance.OrbSpinner, transform);
             spinner.SetActive(true);
             FSMUtility.SendEventToGameObject(spinner, "SPINNER SUMMON");
             isRunning = false;
 
             if (Random.value < 0.5f)
             {
-                var sspm = spinner.LocateMyFSM("Spin Control");
-                var s = sspm.Fsm.GetState("Idle");
-                s.GetFSMStateActionOnState<Rotate>().zAngle = -270;
-                s.SaveActions();
-
-                s = sspm.Fsm.GetState("Spin");
-                s.GetFSMStateActionOnState<Rotate>().zAngle = -270;
-                s.SaveActions();
+                SoulGodMod.SetSpinnerRotate(spinner, -200);
             }
         }
 

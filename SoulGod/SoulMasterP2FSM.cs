@@ -34,8 +34,6 @@ namespace SoulGod
                         var ctrl = orb.AddComponent<MageOrbControl>();
                         ctrl.offset = new(offset, 1);
                         ctrl.canTouchWall = false;
-
-                        FSMUtility.SendEventToGameObject(orb, "FIRE");
                         return orb;
                     }
                     orbL = FollowOrb(-3, orbL);
@@ -45,6 +43,8 @@ namespace SoulGod
                 .GetState(FSMProxy_SoulMasterP2.StateNames.Quake_Land)
                 .AppendFsmStateAction(new InvokeAction(() =>
                 {
+                    FSMUtility.SendEventToGameObject(orbL, "FIRE");
+                    FSMUtility.SendEventToGameObject(orbR, "FIRE");
                     orbL.transform.parent = null;
                     orbR.transform.parent = null;
                     orbL = null;

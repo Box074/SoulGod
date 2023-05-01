@@ -13,6 +13,7 @@ namespace SoulGod
     {
         public Vector2? offset;
         public bool canTouchWall = false;
+        public bool isTrigger = true;
         void Start()
         {
             gameObject.AddComponent<DestroyOnInactive>();
@@ -29,7 +30,7 @@ namespace SoulGod
                 sa.OnExit();
                 s.ActiveActions.Remove(sa);
                 s.RemoveAllFsmStateActions<Collision2dEventLayer>();
-                GetComponent<Collider2D>().isTrigger = true;
+                GetComponent<Collider2D>().isTrigger = isTrigger;
             }
             if(!canTouchWall)
             {

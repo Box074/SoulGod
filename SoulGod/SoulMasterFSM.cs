@@ -1,11 +1,13 @@
 ﻿using FSMProxy;
 using HKTool.FSM;
 using HKTool.FSM.CSFsm;
+using HKTool.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -14,21 +16,27 @@ namespace SoulGod
     internal class SoulMasterFSM : CSFsm<SoulMasterFSM>
     {
         public int BaseHP = 500;
-
+        public bool isTyrant = false;
         [FsmVar(FSMProxy_SoulMaster.VariableNames.Projectile)]
         public FsmGameObject MageOrbInst = new();
 
         [ComponentBinding]
         public tk2dSpriteAnimator anim = null!;
+        [ComponentBinding]
+        public AudioSource audio = null!;
 
-        public GameObject orbL;
-        public GameObject orbR;
+        public GameObject orbL = null!;
+        public GameObject orbR = null!;
+
+        public FSMProxy_SoulMaster proxy = null!;
 
         [ComponentBinding]
-        public HealthManager hm;
+        public HealthManager hm = null!;
         protected override void OnAfterBindPlayMakerFSM()
         {
             base.OnAfterBindPlayMakerFSM();
+
+            proxy = new(FsmComponent);
 
             FsmComponent.SetState(nameof(SoulMasterInit));
 
@@ -48,7 +56,7 @@ namespace SoulGod
                 {
                     GameObject FollowOrb(float offset, GameObject old)
                     {
-                        if(old != null)
+                        if (old != null)
                         {
                             old.transform.parent = null;
                         }
@@ -72,6 +80,30 @@ namespace SoulGod
                     orbL = null;
                     orbR = null;
                 }));
+
+            var ac = FsmComponent.Fsm
+                .GetState(FSMProxy_SoulMaster.StateNames.Attack_Choice)
+                .GetFSMStateActionOnState<SendRandomEventV3>();
+
+            ac.events = ac.events
+                .Append(FsmEvent.GetFsmEvent("SMG SUPER ORB SHOT"))
+                .ToArray();
+            ac.weights = ac.weights
+                .Append(0.35f)
+                .ToArray();
+            ac.eventMax = ac.eventMax
+                .Append(1)
+                .ToArray();
+            ac.missedMax = ac.missedMax
+                .Append(6)
+                .ToArray();
+
+            ac.trackingInts = ac.trackingInts
+                .Append(0)
+                .ToArray();
+            ac.trackingIntsMissed = ac.trackingIntsMissed
+                .Append(0)
+                .ToArray();
         }
 
         [FsmState]
@@ -87,10 +119,98 @@ namespace SoulGod
         [FsmState]
         private IEnumerator SuperOrbShot()
         {
+            DefineGlobalEvent("SMG SUPER ORB SHOT");
+            DefineEvent("TELE", FSMProxy_SoulMaster.StateNames.Teleport);
+            DefineEvent(FsmEvent.Finished, FSMProxy_SoulMaster.StateNames.Reactivate);
+
+            AudioEvent AE_summon = new()
+            {
+                Clip = SoulGodMod.Instance.Soul_Master_Cast_03,
+                PitchMax = 1f,
+                PitchMin = 1f,
+                Volume = 1
+            };
+
             yield return StartActionContent;
+            bool useSecond = isTyrant && UnityEngine.Random.value < 0.6f;
+            if (transform.position.y != proxy.Variables.Top_Y.Value)
+            {
+                var pos = new Vector2(20, proxy.Variables.Top_Y.Value);
+                proxy.Variables.Tele_X.Value = pos.x;
+                proxy.Variables.Tele_Y.Value = pos.y;
+                proxy.Variables.Teleport_Point.Value = pos;
+                proxy.Variables.Next_Event.Value = "SMG SUPER ORB SHOT";
+                yield return "TELE";
+            }
+            anim.Play("Summon");
+            AE_summon.SpawnAndPlayOneShot(SoulGodMod.Instance.audioPlayer, transform.position);
+
+            GameObject SpawnSpinner(float z)
+            {
+                var s = Instantiate((isTyrant && !useSecond) ? SoulGodMod.Instance.SuperOrbSpinner :
+                    SoulGodMod.Instance.OrbSpinner, transform);
+                s.SetActive(true);
+                FSMUtility.SendEventToGameObject(s, "SPINNER SUMMON");
+                SoulGodMod.SetSpinnerRotate(s, z);
+                return s;
+            }
+            var group = new List<GameObject>();
+            for (int i = 0; i < (useSecond ? 2 : 4); i++)
+            {
+                if (i % 2 == 0)
+                {
+                    group.Add(SpawnSpinner(-220 - (i / 2 * 10)));
+                }
+                else
+                {
+                    group.Add(SpawnSpinner(220 + ((i + 1) / 2 * 10)));
+                }
+                yield return new WaitForSeconds(0.75f);
+            }
+
+
+            yield return new WaitForSeconds(useSecond ? 1.25f : 3.45f);
+
+            var orbs = group.SelectMany(x => x.transform.Cast<Transform>())
+                .Select(x => x.gameObject).ToArray();
+            SoulGodMod.Instance.Log("Total Mage Orb Count: " + orbs.Length);
+            foreach (var orb in orbs)
+            {
+                var o = Instantiate(SoulGodMod.Instance.MageOrbPrefab, orb.transform.position,
+                    orb.transform.localRotation);
+                orb.Recycle();
+                FSMUtility.SendEventToGameObject(o, "FIRE");
+
+                if (!useSecond)
+                {
+                    yield return new WaitForSeconds(1.35f * UnityEngine.Random.value);
+                }
+            }
+            foreach (var g in group)
+            {
+                Destroy(g);
+            }
+            if (useSecond)
+            {
+                var pos = new Vector2(20, proxy.Variables.Top_Y.Value + 30);
+                proxy.Variables.Tele_X.Value = pos.x;
+                proxy.Variables.Tele_Y.Value = pos.y;
+                proxy.Variables.Teleport_Point.Value = pos;
+                proxy.Variables.Next_Event.Value = "SMG SUPER ORB SHOT 2";
+                yield return "TELE";
+            }
+            anim.Play("SummonToIdle");
+            yield return new WaitForSeconds(1.25f);
 
         }
+        [FsmState]
+        private IEnumerator SuperOrbShot2()
+        {
+            DefineGlobalEvent("SMG SUPER ORB SHOT 2");
+            DefineEvent(FsmEvent.Finished, FSMProxy_SoulMaster.StateNames.Tele_Away);
+            yield return StartActionContent;
+            yield return new WaitForSeconds(2.5f);
 
-
+        }
     }
 }

@@ -21,7 +21,29 @@ namespace SoulGod
         [PreloadSharedAssets(34, "Mage Orb")]
         public GameObject MageOrbPrefab = null!;
 
+        [PreloadSharedAssets("Audio Player Actor")]
+        public AudioSource audioPlayer = null!;
+
+        [PreloadSharedAssets(102, "Soul_Master_Cast_03")]
+        public AudioClip Soul_Master_Cast_03 = null!;
+
+        [PreloadSharedAssets(102, "mage_lord_projectile_charge")]
+        public AudioClip mage_lord_projectile_charge = null!;
+
         bool hitBySM = false;
+
+        public static void SetSpinnerRotate(GameObject spinner, float z)
+        {
+            var sspm = spinner.LocateMyFSM("Spin Control");
+            sspm.Fsm.RestartOnEnable = true;
+            var s = sspm.Fsm.GetState("Idle");
+            s.GetFSMStateActionOnState<Rotate>().zAngle = z;
+            s.SaveActions();
+
+            s = sspm.Fsm.GetState("Spin");
+            s.GetFSMStateActionOnState<Rotate>().zAngle = z;
+            s.SaveActions();
+        }
 
         public override void Initialize()
         {
@@ -76,7 +98,8 @@ namespace SoulGod
             GameObject newspinner;
             if (pm.gameObject.name == "Dream Mage Lord")
             {
-                fsm.BaseHP = 1000;
+                fsm.isTyrant = true;
+                fsm.BaseHP = 850;
                 SoulTyrantFSM.Apply(pm);
 
                 newspinner = new GameObject("Spinner Group");
@@ -88,21 +111,13 @@ namespace SoulGod
                     var sp1 = UObject.Instantiate(OrbSpinner, newspinner.transform);
                     p.proxy.targets.Add(sp1);
 
-                    var sspm = sp1.LocateMyFSM("Spin Control");
-                    sspm.Fsm.RestartOnEnable = true;
-                    var s = sspm.Fsm.GetState("Idle");
-                    s.GetFSMStateActionOnState<Rotate>().zAngle = rotateZ;
-                    s.SaveActions();
+                    SetSpinnerRotate(sp1, rotateZ);
 
-                    s = sspm.Fsm.GetState("Spin");
-                    s.GetFSMStateActionOnState<Rotate>().zAngle = rotateZ;
-                    s.SaveActions();
-                    
                     sp1.SetActive(true);
                 }
 
-                SpawnSpinner(270);
-                SpawnSpinner(-270);
+                SpawnSpinner(240);
+                SpawnSpinner(-240);
                 
             }
             else

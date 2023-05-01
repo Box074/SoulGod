@@ -13,7 +13,7 @@ A mod that strengthens Uumuu, inspired by a Discord user named aluvion#7275
 - [x] Slamming into the floor takes much less time to charge
 - [ ] ~~When faking out a slam, instead of teleporting and resetting his charge time, it takes no time to charge the slam attack once teleported~~
 - [x] When slamming, two soul orbs on either side of Soul Master form to slam into the ground with him. These orbs do get destroyed from hitting the floor
-- [ ] Gains a new attack where instead of firing an Orb at the player, he fires three Magic Missiles. They are blue, missile-shaped projectiles that will home into the player very fast. They are not affected by the floor and will disappear after four seconds
+- [ ] ~~Gains a new attack where instead of firing an Orb at the player, he fires three Magic Missiles. They are blue, missile-shaped projectiles that will home into the player very fast. They are not affected by the floor and will disappear after four seconds~~
 - [x] When doing Altered Slam in phase 2, Soul Master has two orbs on either side of him, spaced out enough that just dashing to the side will still have you get hit
 - [x] When the player gets hit by any of SM’s attacks, the player will lose 33 units of soul
 - [x] In phase 2, instead of firing orbs from random areas of the arena, several orbs in groups of six will form from him, rotate clockwise, counterclockwise, clockwise, etc., and move slowly away from Soul Master. These orbs are not affected by the ground/walls
