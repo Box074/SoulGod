@@ -84,22 +84,20 @@ namespace SoulGod
                 .GetState(FSMProxy_SoulMaster.StateNames.Fakeout)
                 .InsertFsmStateAction(new InvokeAction(() =>
                 {
-                    if(UnityEngine.Random.value < 0.5f)
+                    if (UnityEngine.Random.value < 0.5f)
                     {
                         proxy.Variables.Faked.Value = false;
                     }
-                    if(!HeroController.instance.cState.onGround
-                        && !HeroController.instance.Reflect().CanDash()    
-                    )
+                    if (!HeroController.instance.cState.onGround)
                     {
-                        if(Mathf.Abs(HeroController.instance.transform.position.x - 
-                            transform.position.x) < 3)
+                        if (Mathf.Abs(HeroController.instance.transform.position.x -
+                            transform.position.x) < 3 && !HeroController.instance.Reflect().CanDash())
                         {
                             proxy.Variables.Faked.Value = true;
                         }
                         else
                         {
-                            if(UnityEngine.Random.value < 0.5f)
+                            if (UnityEngine.Random.value < 0.5f)
                             {
                                 FsmComponent.SendEvent("FAKE");
                             }
@@ -112,21 +110,27 @@ namespace SoulGod
 
             ac.events = ac.events
                 .Append(FsmEvent.GetFsmEvent("SMG SUPER ORB SHOT"))
+                .Append(FsmEvent.GetFsmEvent("SMG QUICK SHOT"))
                 .ToArray();
             ac.weights = ac.weights
+                .Append(0.35f)
                 .Append(0.35f)
                 .ToArray();
             ac.eventMax = ac.eventMax
                 .Append(1)
+                .Append(1)
                 .ToArray();
             ac.missedMax = ac.missedMax
                 .Append(6)
+                .Append(4)
                 .ToArray();
 
             ac.trackingInts = ac.trackingInts
-                .Append(0)
+                .Append(1)
+                .Append(1)
                 .ToArray();
             ac.trackingIntsMissed = ac.trackingIntsMissed
+                .Append(0)
                 .Append(0)
                 .ToArray();
         }
@@ -140,7 +144,36 @@ namespace SoulGod
 
             hm.hp = BaseHP + 500;
         }
+        [FsmState]
+        private IEnumerator QuickShot()
+        {
+            DefineGlobalEvent("SMG QUICK SHOT");
+            DefineEvent(FsmEvent.Finished, FSMProxy_SoulMaster.StateNames.Teleport);
+            yield return StartActionContent;
+            var pos = new Vector2(20, proxy.Variables.Top_Y.Value);
+            proxy.Variables.Tele_X.Value = pos.x;
+            proxy.Variables.Tele_Y.Value = pos.y;
+            proxy.Variables.Teleport_Point.Value = pos;
+            proxy.Variables.Next_Event.Value = "SMG QUICK SHOT 2";
 
+        }
+        [FsmState]
+        private IEnumerator QuickShot2()
+        {
+            DefineGlobalEvent("SMG QUICK SHOT 2");
+            DefineEvent(FsmEvent.Finished, FSMProxy_SoulMaster.StateNames.Reactivate);
+            yield return StartActionContent;
+            var count = UnityEngine.Random.Range(5, 8);
+            for(int i = 0; i < count; i++)
+            {
+                var orb = Instantiate(SoulGodMod.Instance.MageOrbPrefab, 
+                    new(20, proxy.Variables.Top_Y.Value, -0.03f),
+                    Quaternion.identity);
+                orb.SetActive(true);
+                yield return new WaitForSeconds(0.5f);
+            }
+            yield return new WaitForSeconds(1.75f);
+        }
         [FsmState]
         private IEnumerator SuperOrbShot()
         {
@@ -210,7 +243,7 @@ namespace SoulGod
 
                 if (!useSecond)
                 {
-                    yield return new WaitForSeconds(1f 
+                    yield return new WaitForSeconds(1f
                         * UnityEngine.Random.value
                         * (count < 5 ? (5 - count) * 0.2f : 1));
                 }

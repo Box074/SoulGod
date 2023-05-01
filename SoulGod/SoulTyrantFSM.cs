@@ -108,7 +108,10 @@ namespace SoulGod
             DefineEvent(FsmEvent.Finished, FSMProxy_SoulMaster.StateNames.Reactivate);
 
             yield return StartActionContent;
+            
             FSMUtility.SendEventToGameObject(rayOrb, "FIRE");
+            yield return new WaitForSeconds(0.05f);
+            rayOrb.GetComponentInChildren<DamageHero>().damageDealt = 2;
             yield return new WaitForSeconds(UnityEngine.Random.Range(0.75f, 1.25f));
             if (rayOrb.LocateMyFSM("Orb Control").ActiveStateName != "Chase Hero")
             {
